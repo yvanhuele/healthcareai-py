@@ -1,9 +1,9 @@
-"""This file is used to create and compare two models on a particular dataset.
-It provides examples of reading from both csv and SQL Server. Note that this
-example can be run as-is after installing HCPyTools. After you have
-found that one of the models works well on your data, move to Example2
+"""This file demonstrates how to train and compare two models on the same data
+set, as well as examples of reading form csv and SQL Server. Note that this
+example can be run as-is after installing healthcareai.  Example 2 will
+demonstrate how to get scores from a saved model.
 """
-from healthcareai import DevelopSupervisedModel
+from healthcareai import SupervisedModelTrainer
 import pandas as pd
 import time
 
@@ -38,27 +38,27 @@ def main():
     # Drop columns that won't help machine learning
     df.drop(['PatientID','InTestWindowFLG'],axis=1,inplace=True)
 
-    # Step 1: compare two models
-    o = DevelopSupervisedModel(modeltype='classification',
-                               df=df,
-                               predictedcol='ThirtyDayReadmitFLG',
-                               graincol='PatientEncounterID', #OPTIONAL
-                               impute=True,
-                               debug=False)
+    # Establish training parameters
+    train_params = {
+        'predictiontype': 'classification',
+        'predictedcol': 'ThirtyDayReadmitFLG',
+        'graincol': 'PatientID',
+    }
 
-    # Run the linear model
-    o.linear(cores=1)
+    # Train Linear Classifier
+    t1 = SupervisedModelTrainer(modeltype='linear', **train_params)
+    linear_model = t1.train(df)
 
-    # Run the random forest model
-    o.random_forest(cores=1,
-                    tune=True)
+    # Train Random Forest Classifier
+    t2 = SupervisedModelTrainer(modeltype = 'rf', **train_params)
+    rf = t2.train(df)
 
-    # Look at the RF feature importance rankings
-    o.plot_rffeature_importance(save=False)
+    #compare
+    print('\nauc of linear model: ', linear_model.get_roc_auc())
+    print('auc of rf model: ', rf.get_roc_auc())
 
-    # Create ROC plot to compare the two models
-    o.plot_roc(debug=False,
-               save=False)
+    # Look at rf feature importance rankings
+    # print(rf.get_top_features())
 
     print('\nTime:\n', time.time() - t0)
 

@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.model_selection import train_test_split
+import pickle
 
 class SupervisedModelTrainer(object):
     def __init__(self,
@@ -29,7 +30,7 @@ class SupervisedModelTrainer(object):
         self.impute = impute
         self.graincol = graincol
 
-    def train(self, df):
+    def train(self, df, savepath=None):
         """
         Trains and returns a supervised model
         :param df training data
@@ -78,6 +79,10 @@ class SupervisedModelTrainer(object):
                                      self.predictiontype,
                                      y_pred,
                                      y_test)
+
+        #Save if applicable
+        if savepath != None:
+            pickle.dump(finalmodel, open(savepath, 'wb'))
 
         return finalmodel
 

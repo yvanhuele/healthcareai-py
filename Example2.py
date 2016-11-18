@@ -1,20 +1,17 @@
-"""This example lets one deploy the model that was found most accurate in
-Example1. After successfully creating the final model in this step, .pkl files
-will represent the saved model; after this point, you can switch
-use_saved_model to TRUE, such that the next time this script is run, it will
-run the test set against the model that was saved. Note that for this to run
-as-is, you'll have to run the CREATE TABLE statements found below in SSMS.
 """
-from healthcareai import DeploySupervisedModel
+This example shows how to save a model and get predictive scores on a
+separate data set
+"""
+from healthcareai import SupervisedModelTrainer
 import pandas as pd
 import time
+import pickle
 
 
 def main():
 
     t0 = time.time()
 
-    # Load in data
     # CSV snippet for reading data into dataframe
     df = pd.read_csv('healthcareai/tests/fixtures/HCPyDiabetesClinical.csv',
                      na_values=['None'])
@@ -39,24 +36,32 @@ def main():
     print(df.head())
     print(df.dtypes)
 
+    # Divide into training set and scoring set
+
+    df_train = df[df['InTestWindowFLG'] == 'N']
+    df_to_score = df[df['InTestWindowFLG'] == 'Y']
+
     # Drop columns that won't help machine learning
-    df.drop('PatientID', axis=1, inplace=True)
+    df_train = df_train.drop(['PatientID', 'InTestWindowFLG'], axis=1)
 
-    p = DeploySupervisedModel(modeltype='regression',
-                              df=df,
-                              graincol='PatientEncounterID',
-                              windowcol='InTestWindowFLG',
-                              predictedcol='LDLNBR',
-                              impute=True,
-                              debug=False)
+    # Establish training parameters
+    train_params = {
+        'predictiontype': 'classification',
+        'predictedcol': 'ThirtyDayReadmitFLG',
+        'graincol': 'PatientID',
+    }
 
-    p.deploy(method='rf',
-             cores=2,
-             server='localhost',
-             dest_db_schema_table='[SAM].[dbo].[HCPyDeployRegressionBASE]',
-             use_saved_model=False,
-             trees=200,
-             debug=False)
+    # Train and Save random forest model
+    save_filepath = 'example_rf.pkl'
+    t2 = SupervisedModelTrainer(modeltype='rf', **train_params)
+    t2.train(df_train, savepath=save_filepath)
+
+    # Load random forest model from file
+    rf_model = pickle.load(open(save_filepath, 'rb'))
+
+    # Score scoring set
+    df_scored = rf_model.score(df_to_score)
+    print('scored records:\n', df_scored.head())
 
     print('\nTime:\n', time.time() - t0)
 
