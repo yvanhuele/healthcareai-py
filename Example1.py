@@ -36,7 +36,7 @@ def main():
     print(df.dtypes)
 
     # Drop columns that won't help machine learning
-    df.drop(['PatientID','InTestWindowFLG'],axis=1,inplace=True)
+    df.drop(['PatientID','InTestWindowFLG'], axis=1, inplace=True)
 
     # Establish training parameters
     train_params = {
@@ -50,7 +50,7 @@ def main():
     linear_model = t1.train(df)
 
     # Train Random Forest Classifier
-    t2 = SupervisedModelTrainer(modeltype = 'rf', **train_params)
+    t2 = SupervisedModelTrainer(modeltype='rf', **train_params)
     rf = t2.train(df)
 
     #compare
