@@ -1,5 +1,5 @@
 from sklearn.base import TransformerMixin
-from ..common.data import is_categorical
+from healthcareai.common.data import is_categorical
 import pandas as pd
 import numpy as np
 
