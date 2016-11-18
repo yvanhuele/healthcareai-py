@@ -50,6 +50,7 @@ def main():
     linear_model = t1.train(df)
 
     # Train Random Forest Classifier
+
     t2 = SupervisedModelTrainer(modeltype='rf', **train_params)
     rf = t2.train(df)
 

@@ -30,11 +30,7 @@ class SupervisedModelTrainer(object):
         self.impute = impute
         self.graincol = graincol
 
-<<<<<<< HEAD
     def train(self, df, savepath=None):
-=======
-    def train(self, df):
->>>>>>> restructure code to use training and model classes rather than dev and deploy classes
         """
         Trains and returns a supervised model
         :param df training data
@@ -84,12 +80,9 @@ class SupervisedModelTrainer(object):
                                      y_pred,
                                      y_test)
 
-<<<<<<< HEAD
         #Save if applicable
         if savepath != None:
             pickle.dump(finalmodel, open(savepath, 'wb'))
 
-=======
->>>>>>> restructure code to use training and model classes rather than dev and deploy classes
         return finalmodel
 
