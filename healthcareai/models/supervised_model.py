@@ -1,5 +1,5 @@
 from sklearn.metrics import roc_auc_score
-
+from healthcareai.common.connections import write_scores_to_sql
 
 class SupervisedModel(object):
     def __init__(self,
@@ -7,6 +7,7 @@ class SupervisedModel(object):
                  pipeline,
                  column_names,
                  predictiontype,
+                 graincol,
                  y_pred,
                  y_actual):
         """
@@ -16,10 +17,11 @@ class SupervisedModel(object):
         self.pipeline = pipeline
         self.column_names = column_names
         self.predictiontype = predictiontype
+        self.graincol = graincol
         self.y_pred = y_pred
         self.y_actual = y_actual
 
-    def score(self, score_df, saveto=None):
+    def score(self, df_to_score, saveto=None):
         """
         Returns model with predicted probability scores in
         :param score_df: the data to be scored
@@ -28,17 +30,27 @@ class SupervisedModel(object):
             a csv of the data, but with an additional column of scores.
         :returns: the input database with a column of scores.
         """
-        df = score_df.copy()
+
+        # Get predictive scores
+        df = df_to_score.copy()
         df = self.pipeline.transform(df)
         df = df[[c for c in df.columns if c in self.column_names]]
-        df['score'] = self.model.predict_proba(df)[:, 1]
+        df['y_pred'] = self.model.predict_proba(df)[:, 1]
+        df[self.graincol] = df_to_score[self.graincol]
+
+        # Get top 3 reasons
+        # TODO calculate top 3 factors
+        df['Factor1TXT'] = 'Thing1'
+        df['Factor2TXT'] = 'Thing2'
+        df['Factor3TXT'] = 'Thing3'
 
         if saveto == 'sql':
-            # TODO Fill in code to write to sql server.
-            pass
-
+            write_scores_to_sql(df,
+                                predictiontype=self.predictiontype,
+                                graincol=self.graincol,
+                                )
         elif saveto != None:
-            df.to_csv(save)
+            df.to_csv(saveto)
 
         return df
 

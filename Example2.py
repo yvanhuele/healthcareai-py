@@ -48,7 +48,7 @@ def main():
     train_params = {
         'predictiontype': 'classification',
         'predictedcol': 'ThirtyDayReadmitFLG',
-        'graincol': 'PatientID',
+        'graincol': 'PatientEncounterID',
     }
 
     # Train and Save random forest model
@@ -59,8 +59,8 @@ def main():
     # Load random forest model from file
     rf_model = pickle.load(open(save_filepath, 'rb'))
 
-    # Score scoring set
-    df_scored = rf_model.score(df_to_score)
+    # Score scoring set & save results to SAM database
+    df_scored = rf_model.score(df_to_score, saveto='sql')
     print('scored records:\n', df_scored.head())
 
     print('\nTime:\n', time.time() - t0)
