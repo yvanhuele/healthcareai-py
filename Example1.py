@@ -42,7 +42,7 @@ def main():
     train_params = {
         'predictiontype': 'classification',
         'predictedcol': 'ThirtyDayReadmitFLG',
-        'graincol': 'PatientID',
+        'graincol': 'PatientEncounterID',
     }
 
     # Train Linear Classifier

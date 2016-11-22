@@ -77,6 +77,7 @@ class SupervisedModelTrainer(object):
                                      pipeline,
                                      column_names,
                                      self.predictiontype,
+                                     self.graincol,
                                      y_pred,
                                      y_test)
 
