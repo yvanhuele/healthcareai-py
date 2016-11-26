@@ -1,66 +1,33 @@
 """
-This example shows how to save a model and get predictive scores on a
-separate data set
+Important: Make sure to run Example1.py first, or otherwise
+save a model under the filepath 'rf_model.pkl'
+
+Example2.py shows how to get predictive scores from a saved model,
+and save them.
 """
-from healthcareai import SupervisedModelTrainer
+from healthcareai.common.connections import load_saved_model
 import pandas as pd
 import time
-import pickle
 
 
 def main():
 
     t0 = time.time()
 
-    # CSV snippet for reading data into dataframe
+    # load data to score
+    # we will use the set defined by InTestWindow in our .csv
+
     df = pd.read_csv('healthcareai/tests/fixtures/HCPyDiabetesClinical.csv',
                      na_values=['None'])
-
-    # SQL snippet for reading data into dataframe
-    # import pyodbc
-    # cnxn = pyodbc.connect("""SERVER=localhost;
-    #                          DRIVER={SQL Server Native Client 11.0};
-    #                          Trusted_Connection=yes;
-    #                          autocommit=True""")
-    #
-    # df = pd.read_sql(
-    #     sql="""SELECT
-    #            *
-    #            FROM [SAM].[dbo].[HCPyDiabetesClinical]""",
-    #     con=cnxn)
-    #
-    # # Set None string to be None type
-    # df.replace(['None'],[None],inplace=True)
-
-    # Look at data that's been pulled in
-    print(df.head())
-    print(df.dtypes)
-
-    # Divide into training set and scoring set
-
-    df_train = df[df['InTestWindowFLG'] == 'N']
     df_to_score = df[df['InTestWindowFLG'] == 'Y']
 
-    # Drop columns that won't help machine learning
-    df_train = df_train.drop(['PatientID', 'InTestWindowFLG'], axis=1)
+    rf_model = load_saved_model('rf_model.pkl')
 
-    # Establish training parameters
-    train_params = {
-        'predictiontype': 'classification',
-        'predictedcol': 'ThirtyDayReadmitFLG',
-        'graincol': 'PatientEncounterID',
-    }
+    # Score records and save scores to .csv.
+    # To save instead to a SAM database, use saveto='sql'
+    # If you do not need to save scores, leave out the saveto parameter.
 
-    # Train and Save random forest model
-    save_filepath = 'example_rf.pkl'
-    t2 = SupervisedModelTrainer(modeltype='rf', **train_params)
-    t2.train(df_train, savepath=save_filepath)
-
-    # Load random forest model from file
-    rf_model = pickle.load(open(save_filepath, 'rb'))
-
-    # Score scoring set & save results to SAM database
-    df_scored = rf_model.score(df_to_score, saveto='sql')
+    df_scored = rf_model.score(df_to_score, saveto='scores.csv')
     print('scored records:\n', df_scored.head())
 
     print('\nTime:\n', time.time() - t0)

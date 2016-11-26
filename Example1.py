@@ -1,11 +1,12 @@
-"""This file demonstrates how to train and compare two models on the same data
-set, as well as examples of reading form csv and SQL Server. Note that this
+"""This file demonstrates how to train, compare, and save models on training
+ data as well as examples of reading form csv and SQL Server. Note that this
 example can be run as-is after installing healthcareai.  Example 2 will
 demonstrate how to get scores from a saved model.
 """
 from healthcareai import SupervisedModelTrainer
 import pandas as pd
 import time
+import pickle
 
 def main():
 
@@ -15,7 +16,7 @@ def main():
     df = pd.read_csv('healthcareai/tests/fixtures/HCPyDiabetesClinical.csv',
                      na_values=['None'])
 
-    # SQL snippet for reading data into dataframe
+    # SQL snippet for reading data into dataframe (uncomment to use)
     # import pyodbc
     # cnxn = pyodbc.connect("""SERVER=localhost;
     #                          DRIVER={SQL Server Native Client 11.0};
@@ -53,14 +54,19 @@ def main():
     t2 = SupervisedModelTrainer(modeltype='rf', **train_params)
     rf = t2.train(df)
 
-    #compare
+    # Compare performance on the two models
     print('\nauc of linear model: ', linear_model.get_roc_auc())
     print('auc of rf model: ', rf.get_roc_auc())
 
     # Look at rf feature importance rankings
     # print(rf.get_top_features())
 
+    # Save the random forest model
+    rf.save('rf_model.pkl')
+
     print('\nTime:\n', time.time() - t0)
+
+
 
 if __name__ == "__main__":
     main()

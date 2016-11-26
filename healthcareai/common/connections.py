@@ -3,7 +3,10 @@ Methods relating to database connections
 """
 import pyodbc
 from datetime import datetime
+import pickle
 
+def load_saved_model(filepath):
+    return pickle.load(open(filepath, 'rb'))
 
 def write_scores_to_sql(scores_df,
                         predictiontype='classification',

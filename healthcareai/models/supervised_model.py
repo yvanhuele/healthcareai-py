@@ -1,5 +1,6 @@
 from sklearn.metrics import roc_auc_score
 from healthcareai.common.connections import write_scores_to_sql
+import pickle
 
 class SupervisedModel(object):
     def __init__(self,
@@ -21,6 +22,9 @@ class SupervisedModel(object):
         self.y_pred = y_pred
         self.y_actual = y_actual
 
+    def save(self, filepath):
+        pickle.dump(self, open(filepath, 'wb'))
+
     def score(self, df_to_score, saveto=None):
         """
         Returns model with predicted probability scores in
@@ -35,14 +39,16 @@ class SupervisedModel(object):
         df = df_to_score.copy()
         df = self.pipeline.transform(df)
         df = df[[c for c in df.columns if c in self.column_names]]
+
         df['y_pred'] = self.model.predict_proba(df)[:, 1]
-        df[self.graincol] = df_to_score[self.graincol]
+        df.insert(0, self.graincol, df_to_score[self.graincol])
 
         # Get top 3 reasons
         # TODO calculate top 3 factors
         df['Factor1TXT'] = 'Thing1'
         df['Factor2TXT'] = 'Thing2'
         df['Factor3TXT'] = 'Thing3'
+        df.reset_index(drop=True, inplace=True)
 
         if saveto == 'sql':
             write_scores_to_sql(df,
