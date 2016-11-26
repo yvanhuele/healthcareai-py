@@ -56,24 +56,34 @@ class SupervisedModelTrainer(object):
         X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                             test_size=0.2)
 
-        #Determine model type
+        # Determine model type
         if self.predictiontype == 'classification' and self.modeltype == 'rf':
             model = RandomForestClassifier()
+            feature_model = LogisticRegression()
 
         elif self.predictiontype == 'classification' and self.modeltype == 'linear':
             model = LogisticRegression()
+            feature_model = LogisticRegression()
 
         elif self.predictiontype == 'regression' and self.modeltype == 'rf':
             model = RandomForestRegressor()
+            feature_model = LinearRegression()
 
         elif self.predictiontype == 'regression' and self.modeltype == 'linear':
-            model = LinearRegression()
+            feature_model = LinearRegression()
 
-        #Train model
+        # Train model
         model.fit(X_train, y_train)
         y_pred = model.predict_proba(X_test)[:,1]
+
+        # Train features model
+        feature_model.fit(X_train, y_train)
+
+        # Instantiate model
         column_names = X_test.columns.values
+        print('num columns: ', len(column_names))
         finalmodel = SupervisedModel(model,
+                                     feature_model,
                                      pipeline,
                                      column_names,
                                      self.predictiontype,

@@ -1,10 +1,13 @@
+import pandas as pd
+import pickle
 from sklearn.metrics import roc_auc_score
 from healthcareai.common.connections import write_scores_to_sql
-import pickle
+from healthcareai.common.model_eval import get_top_k_features
 
 class SupervisedModel(object):
     def __init__(self,
                  model,
+                 feature_model,
                  pipeline,
                  column_names,
                  predictiontype,
@@ -12,9 +15,18 @@ class SupervisedModel(object):
                  y_pred,
                  y_actual):
         """
-        Docstring here
+        A trained regressor or classifier
+        :param model:
+        :param feature_model:
+        :param pipeline:
+        :param column_names:
+        :param predictiontype:
+        :param graincol:
+        :param y_pred:
+        :param y_actual:
         """
         self.model = model
+        self.feature_model = feature_model
         self.pipeline = pipeline
         self.column_names = column_names
         self.predictiontype = predictiontype
@@ -25,12 +37,12 @@ class SupervisedModel(object):
     def save(self, filepath):
         pickle.dump(self, open(filepath, 'wb'))
 
-    def score(self, df_to_score, saveto=None):
+    def score(self, df_to_score, saveto=None, numtopfeatures=3):
         """
-        Returns model with predicted probability scores in
-        :param score_df: the data to be scored
-        :param save: 'sql' or a filepath. 'sql' directs the save to
-            the SAM database as per the documentation. A filepath saves
+        Returns model with predicted probability scores and top 3 features
+        :param df_to_score: the data to be scored
+        :param saveto: 'sql' or a filepath. 'sql' directs the save to
+            the SAM database as per the documentsation. A filepath saves
             a csv of the data, but with an additional column of scores.
         :returns: the input database with a column of scores.
         """
@@ -40,14 +52,21 @@ class SupervisedModel(object):
         df = self.pipeline.transform(df)
         df = df[[c for c in df.columns if c in self.column_names]]
 
-        df['y_pred'] = self.model.predict_proba(df)[:, 1]
-        df.insert(0, self.graincol, df_to_score[self.graincol])
+        y_pred = self.model.predict_proba(df)[:, 1]
 
         # Get top 3 reasons
-        # TODO calculate top 3 factors
-        df['Factor1TXT'] = 'Thing1'
-        df['Factor2TXT'] = 'Thing2'
-        df['Factor3TXT'] = 'Thing3'
+        reason_col_names = ['Factor%iTXT'%i for i in range(1,numtopfeatures+1)]
+        top_feats_lists = get_top_k_features(df, self.feature_model,
+                                             k=numtopfeatures)
+
+        # join prediction and top features columns to dataframe
+        df['y_pred'] = y_pred
+        reasons_df = pd.DataFrame(top_feats_lists, columns=reason_col_names,
+                                  index=df.index)
+        df = pd.concat([df, reasons_df], axis=1, join_axes=[df.index])
+
+        # bring back the grain column and reset the df index
+        df.insert(0, self.graincol, df_to_score[self.graincol])
         df.reset_index(drop=True, inplace=True)
 
         if saveto == 'sql':
