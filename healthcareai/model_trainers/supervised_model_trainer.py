@@ -81,7 +81,6 @@ class SupervisedModelTrainer(object):
 
         # Instantiate model
         column_names = X_test.columns.values
-        print('num columns: ', len(column_names))
         finalmodel = SupervisedModel(model,
                                      feature_model,
                                      pipeline,

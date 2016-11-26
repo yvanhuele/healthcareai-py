@@ -18,7 +18,6 @@ def get_top_k_features(df, linear_model, k=3):
     :return: k lists of top features (the first list is the top features, the
         second list are the #2 features, etc)
     """
-    print 'num gettopkfeaturescols:', len(df.columns)
     res = pd.DataFrame(df.values * linear_model.coef_, columns=df.columns)
     res.apply(top_cols, axis=1)
     return list(res.apply(top_cols, axis=1).values[:, :k])
