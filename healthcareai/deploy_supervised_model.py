@@ -1,3 +1,6 @@
+import datetime
+import math
+import pyodbc
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from healthcareai.common.transformers import DataFrameImputer
@@ -5,9 +8,6 @@ from healthcareai.common import model_eval
 from healthcareai.common import filters
 import numpy as np
 import pandas as pd
-import pyodbc
-import datetime
-import math
 
 
 class DeploySupervisedModel(object):

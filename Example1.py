@@ -40,7 +40,7 @@ def main():
 
     # Step 1: compare two models
     o = DevelopSupervisedModel(modeltype='classification',
-                               df=df,
+                               dataframe=df,
                                predictedcol='ThirtyDayReadmitFLG',
                                graincol='PatientEncounterID', #OPTIONAL
                                impute=True,
@@ -54,11 +54,10 @@ def main():
                     tune=True)
 
     # Look at the RF feature importance rankings
-    o.plot_rffeature_importance(save=False)
+    o.plot_rffeature_importance()
 
     # Create ROC plot to compare the two models
-    o.plot_roc(debug=False,
-               save=False)
+    o.plot_roc()
 
     print('\nTime:\n', time.time() - t0)
 

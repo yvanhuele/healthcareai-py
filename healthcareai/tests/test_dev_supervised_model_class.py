@@ -18,7 +18,7 @@ class TestRFDevTuneFalse(unittest.TestCase):
         # Convert numeric columns to factor/category columns
         np.random.seed(42)
         self.o = DevelopSupervisedModel(modeltype='classification',
-                                        df=df,
+                                        dataframe=df,
                                         predictedcol='ThirtyDayReadmitFLG',
                                         impute=True)
         self.o.random_forest(cores=1)
@@ -41,7 +41,7 @@ class TestRFDevTuneTrueRegular(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DevelopSupervisedModel(modeltype='classification',
-                                        df=df,
+                                        dataframe=df,
                                         predictedcol='ThirtyDayReadmitFLG',
                                         impute=True)
 
@@ -64,7 +64,7 @@ class TestRFDevTuneTrue2ColError(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DevelopSupervisedModel(modeltype='classification',
-                                        df=df,
+                                        dataframe=df,
                                         predictedcol='ThirtyDayReadmitFLG',
                                         impute=True)
 
@@ -86,7 +86,7 @@ class TestLinearDevTuneFalse(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DevelopSupervisedModel(modeltype='classification',
-                                        df=df,
+                                        dataframe=df,
                                         predictedcol='ThirtyDayReadmitFLG',
                                         impute=True)
         self.o.linear(cores=1)

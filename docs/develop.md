@@ -2,10 +2,8 @@
 
 ## What is `DevelopSupervisedModel`?
 
--   This class let's one create and compare custom models on diverse
-    datasets.
--   One can do both classification (ie, predict Y/N) as well as
-    regression (ie, predict a numeric field).
+-   This class let's one create and compare custom models on diverse datasets.
+-   One can do both classification (ie, predict Y/N) as well as regression (ie, predict a numeric field).
 -   To jump straight to an example notebook, see
     [here](https://github.com/HealthCatalystSLC/healthcareai-py/blob/master/notebooks/Example1.ipynb)
 
@@ -102,14 +100,13 @@ of importance to the model.
 
 -   **Return**: a plot.
 -   **Arguments**:
-    :   -   **save**: a boolean, defaults to False. If True, the plot is
-            saved to the location displayed in the console.
+    :   -   **filename**: an optional string. If it is passed in, the plot is saved with the given filename.
 
 Example code:
 
 ```python
 # Look at the feature importance rankings
-o.plot_rffeature_importance(save=False)
+o.plot_rffeature_importance()
 ```
 
 The `plot_roc` method plots the AU\_ROC chart, for easier model
@@ -117,17 +114,14 @@ comparison.
 
 -   **Return**: a plot.
 -   **Arguments**:
-    :   -   **save**: a boolean, defaults to False. If True, the plot is
-            saved to the location displayed in the console.
-        -   **debug**: a boolean. If True, console output is verbose for
-            easier debugging.
+    :   -   **filename**: an optional string. If it is passed in, the plot is saved with the given filename.
+        -   **debug**: a boolean. If True, console output is verbose for easier debugging.
 
 Example code:
 
 ```python
 # Create ROC plot to compare the two models
-o.plot_roc(debug=False,
-           save=False)
+o.plot_roc()
 ```
 
 ## Full example code
@@ -187,11 +181,10 @@ def main():
                     tune=True)
 
     # Look at the RF feature importance rankings
-    o.plot_rffeature_importance(save=False)
+    o.plot_rffeature_importance()
 
     # Create ROC plot to compare the two models
-    o.plot_roc(debug=False,
-            save=False)
+    o.plot_roc()
 
     print('\nTime:\n', time.time() - t0)
 

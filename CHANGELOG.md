@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Changed API for plot functions to take an optional filename for saving the plots as pngs rather than the boolean save value.
+- Clarified some variable names to make pylint happy.
+
 ### Fixed
 
 ## [0.1.8] - 2017-02-16

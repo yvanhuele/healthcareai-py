@@ -1,3 +1,4 @@
+import os
 from sklearn import model_selection
 from sklearn.linear_model import LinearRegression, LogisticRegressionCV
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -8,7 +9,6 @@ import pandas as pd
 from healthcareai.common import model_eval
 from healthcareai.common.transformers import DataFrameImputer
 from healthcareai.common import filters
-import os
 
 
 class DevelopSupervisedModel(object):
@@ -23,7 +23,7 @@ class DevelopSupervisedModel(object):
     modeltype (str) : whether the model will be 'classification' or
     'regression'
 
-    df (dataframe) : data that your model is based on
+    dataframe (dataframe) : data that your model is based on
 
     predictedcol (str) : y column (in ticks) who's values are being predicted
 
@@ -40,17 +40,11 @@ class DevelopSupervisedModel(object):
     Object representing the cleaned data, against which methods are run
     """
 
-    def __init__(self,
-                 modeltype,
-                 df,
-                 predictedcol,
-                 impute,
-                 graincol=None,
-                 debug=False):
+    def __init__(self, modeltype, dataframe, predictedcol, impute, graincol=None, debug=False):
 
-        self.df = df
-        self.predictedcol = predictedcol
         self.modeltype = modeltype
+        self.dataframe = dataframe
+        self.predictedcol = predictedcol
         self.impute = impute
         self.y_probab_linear = None
         self.y_probab_rf = None
@@ -64,67 +58,67 @@ class DevelopSupervisedModel(object):
 
         if debug:
             print('Shape and top 5 rows of original dataframe:')
-            print(self.df.shape)
-            print(self.df.head())
+            print(self.dataframe.shape)
+            print(self.dataframe.head())
 
-        #remove datetime columns
-        self.df = filters.remove_datetime_columns(self.df)
+        # remove datetime columns
+        self.dataframe = filters.remove_datetime_columns(self.dataframe)
 
         # Remove graincol (if specified)
         if graincol:
-            self.df.drop(graincol, axis=1, inplace=True)
+            self.dataframe.drop(graincol, axis=1, inplace=True)
 
         if debug:
             print('\nDataframe after removing DTS columns:')
-            print(self.df.head())
+            print(self.dataframe.head())
             print('\nNow either doing imputation or dropping rows with NULLs')
 
         if self.impute:
-            self.df = DataFrameImputer().fit_transform(self.df)
+            self.dataframe = DataFrameImputer().fit_transform(self.dataframe)
             # This class comes from here:
             # http://stackoverflow.com/a/25562948/5636012
             if debug:
                 print('\nself.df after doing imputation:')
-                print(self.df.shape)
-                print(self.df.head())
+                print(self.dataframe.shape)
+                print(self.dataframe.head())
         else:
             # TODO switch similar statements to work inplace
-            self.df = self.df.dropna(axis=0, how='any', inplace=True)
+            self.dataframe = self.dataframe.dropna(axis=0, how='any', inplace=True)
             print('\nself.df after dropping rows with NULLS:')
-            print(self.df.shape)
-            print(self.df.head())
+            print(self.dataframe.shape)
+            print(self.dataframe.head())
 
-        #CALL new function!!
+        # CALL new function!!
         # Convert predicted col to 0/1 (otherwise won't work with GridSearchCV)
         # Note that this makes healthcareai only handle N/Y in pred column
         if self.modeltype == 'classification':
             # Turning off warning around replace
             pd.options.mode.chained_assignment = None  # default='warn'
             # TODO: put try/catch here when type = class and predictor is numer
-            self.df[self.predictedcol].replace(['Y', 'N'], [1, 0],
-                                               inplace=True)
+            self.dataframe[self.predictedcol].replace(['Y', 'N'], [1, 0],
+                                                      inplace=True)
 
             if debug:
                 print('\nDataframe after converting to 1/0 instead of Y/N for '
                       'classification:')
-                print(self.df.head())
+                print(self.dataframe.head())
 
         # Remove rows with null values in predicted col
-        self.df = self.df[pd.notnull(self.df[self.predictedcol])]
+        self.dataframe = self.dataframe[pd.notnull(self.dataframe[self.predictedcol])]
 
         if debug:
             print('\nself.df after removing rows where predicted col is NULL:')
-            print(self.df.shape)
-            print(self.df.head())
+            print(self.dataframe.shape)
+            print(self.dataframe.head())
 
         # Create dummy vars for all cols but predictedcol
         # First switch (temporarily) pred col to numeric (so it's not dummy)
-        self.df[self.predictedcol] = pd.to_numeric(
-            arg=self.df[self.predictedcol], errors='raise')
-        self.df = pd.get_dummies(self.df, drop_first=True, prefix_sep='.')
+        self.dataframe[self.predictedcol] = pd.to_numeric(
+            arg=self.dataframe[self.predictedcol], errors='raise')
+        self.dataframe = pd.get_dummies(self.dataframe, drop_first=True, prefix_sep='.')
 
-        y = np.squeeze(self.df[[self.predictedcol]])
-        X = self.df.drop([self.predictedcol], axis=1)
+        y = np.squeeze(self.dataframe[[self.predictedcol]])
+        X = self.dataframe.drop([self.predictedcol], axis=1)
 
         # Split the dataset in two equal parts
         self.X_train, self.X_test, self.y_train, self.y_test = \
@@ -165,16 +159,10 @@ class DevelopSupervisedModel(object):
         else:
             algo = None
 
-        self.y_probab_linear, self.au_roc = model_eval.clfreport(
-                                                modeltype=self.modeltype,
-                                                debug=debug,
-                                                devcheck='yesdev',
-                                                algo=algo,
-                                                X_train=self.X_train,
-                                                y_train=self.y_train,
-                                                X_test=self.X_test,
-                                                y_test=self.y_test,
-                                                cores=cores)
+        self.y_probab_linear, self.au_roc = model_eval.clfreport(modeltype=self.modeltype, debug=debug,
+                                                                 devcheck='yesdev', algo=algo, X_train=self.X_train,
+                                                                 y_train=self.y_train, X_test=self.X_test,
+                                                                 y_test=self.y_test, cores=cores)
 
     def random_forest(self, cores=4, trees=200, tune=False, debug=False):
         """
@@ -208,35 +196,26 @@ class DevelopSupervisedModel(object):
 
         params = {'max_features':
                       model_eval.calculate_rfmtry(len(self.X_test.columns),
-                                                      self.modeltype)}
+                                                  self.modeltype)}
 
         self.col_list = self.X_train.columns.values
 
-        self.y_probab_rf, self.au_roc, self.rfclf = model_eval.clfreport(
-                                                    modeltype=self.modeltype,
-                                                    debug=debug,
-                                                    devcheck='yesdev',
-                                                    algo=algo,
-                                                    X_train=self.X_train,
-                                                    y_train=self.y_train,
-                                                    X_test=self.X_test,
-                                                    y_test=self.y_test,
-                                                    param=params,
-                                                    cores=cores,
-                                                    tune=tune,
-                                                    col_list=self.col_list)
+        self.y_probab_rf, self.au_roc, self.rfclf = model_eval.clfreport(modeltype=self.modeltype, debug=debug,
+                                                                         devcheck='yesdev', algo=algo,
+                                                                         X_train=self.X_train, y_train=self.y_train,
+                                                                         X_test=self.X_test, y_test=self.y_test,
+                                                                         param=params, cores=cores, tune=tune,
+                                                                         col_list=self.col_list)
 
-
-    def plot_roc(self, save=False, debug=False):
+    def plot_roc(self, filename=None, debug=False):
         """
         Plots roc related to models resulting from linear and random
         forest methods within the DevelopSupervisedModel step.
 
         Parameters
         ----------
-        save (boolean) : Whether to save the plot
-        debug (boolean) : Verbosity of output. If True, shows list of
-        FPR/TPR for each point in the plot (default False)
+        filename (string) : Optional filename to save plot as
+        debug (boolean) : Verbosity of output. If True, shows list of FPR/TPR for each point in the plot (default False)
 
         Returns
         -------
@@ -273,22 +252,20 @@ class DevelopSupervisedModel(object):
         plt.ylabel('True Positive Rate')
         plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
-        if save:
-            plt.savefig('ROC.png')
-            source_path = os.path.dirname(os.path.abspath(__file__))
-            print('\nROC file saved in: {}'.format(source_path))
-            plt.show()
-        else:
-            plt.show()
 
-    def plot_rffeature_importance(self, save=False):
+        if filename:
+            self._save_plot_as_png(plt, filename)
+
+        plt.show()
+
+    def plot_rffeature_importance(self, filename=None):
         """
         Plots feature importances related to models resulting from
         and random forest methods within the DevelopSupervisedModel step.
 
         Parameters
         ----------
-        save (boolean) : Whether to save the plot
+        filename (string) : If this is passed in, saves the plot as that filename.png
 
         Returns
         -------
@@ -298,16 +275,10 @@ class DevelopSupervisedModel(object):
         # Arrange columns in order of importance
         if hasattr(self.rfclf, 'best_estimator_'):
             importances = self.rfclf.best_estimator_.feature_importances_
-            std = np.std(
-                        [tree.feature_importances_ for tree in
-                        self.rfclf.best_estimator_.estimators_],
-                        axis=0)
+            std = np.std([tree.feature_importances_ for tree in self.rfclf.best_estimator_.estimators_], axis=0)
         else:
             importances = self.rfclf.feature_importances_
-            std = np.std(
-                        [tree.feature_importances_ for tree in
-                         self.rfclf.estimators_],
-                        axis=0)
+            std = np.std([tree.feature_importances_ for tree in self.rfclf.estimators_], axis=0)
 
         indices = np.argsort(importances)[::-1]
         namelist = [self.col_list[i] for i in indices]
@@ -315,17 +286,24 @@ class DevelopSupervisedModel(object):
         # Plot these columns
         plt.figure()
         plt.title("Feature importances")
-        plt.bar(range(self.X_train.shape[1]),
-                importances[indices], color="r",
-                yerr=std[indices], align="center")
+        plt.bar(range(self.X_train.shape[1]), importances[indices], color="r", yerr=std[indices], align="center")
         plt.xticks(range(self.X_train.shape[1]), namelist, rotation=90)
         plt.xlim([-1, self.X_train.shape[1]])
         plt.gca().set_ylim(bottom=0)
         plt.tight_layout()
-        if save:
-            plt.savefig('FeatureImportances.png')
-            source_path = os.path.dirname(os.path.abspath(__file__))
-            print('\nFeature importances saved in: {}'.format(source_path))
-            plt.show()
-        else:
-            plt.show()
+
+        if filename:
+            self._save_plot_as_png(plt, filename)
+
+        plt.show()
+
+    @staticmethod
+    def _save_plot_as_png(plot, filename):
+        """
+        Saves a plot as a .png with the given filename
+        :param plot: matplotlib.pyplot
+        :param filename: a string filename
+        """
+        plot.savefig('{}.png'.format(filename))
+        source_path = os.path.dirname(os.path.abspath(__file__))
+        print('Plot saved in: {}/{}'.format(source_path, filename))
