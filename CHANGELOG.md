@@ -10,8 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Breaking changes to develop and deploy classes for dataframe parameter name
 - Changed API for plot functions to take an optional filename for saving the plots as pngs rather than the boolean save value.
 - Clarified some variable names to make pylint happy.
+- First pass breaking deploy class into smaller methods.
 
 ### Fixed
 

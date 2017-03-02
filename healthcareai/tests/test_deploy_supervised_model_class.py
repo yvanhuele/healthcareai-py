@@ -16,7 +16,7 @@ class TestRFDeployNoTreesNoMtry(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DeploySupervisedModel(modeltype='classification',
-                                       df=df,
+                                       dataframe=df,
                                        graincol='PatientEncounterID',
                                        windowcol='InTestWindowFLG',
                                        predictedcol='ThirtyDayReadmitFLG',
@@ -44,7 +44,7 @@ class TestRFDeployNoTreesWithMtry(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DeploySupervisedModel(modeltype='classification',
-                                       df=df,
+                                       dataframe=df,
                                        graincol='PatientEncounterID',
                                        windowcol='InTestWindowFLG',
                                        predictedcol='ThirtyDayReadmitFLG',
@@ -73,7 +73,7 @@ class TestRFDeployWithTreesNoMtry(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DeploySupervisedModel(modeltype='classification',
-                                       df=df,
+                                       dataframe=df,
                                        graincol='PatientEncounterID',
                                        windowcol='InTestWindowFLG',
                                        predictedcol='ThirtyDayReadmitFLG',
@@ -102,7 +102,7 @@ class TestLinearDeploy(unittest.TestCase):
 
         np.random.seed(42)
         self.o = DeploySupervisedModel(modeltype='classification',
-                                       df=df,
+                                       dataframe=df,
                                        graincol='PatientEncounterID',
                                        windowcol='InTestWindowFLG',
                                        predictedcol='ThirtyDayReadmitFLG',

@@ -43,7 +43,7 @@ def main():
     df.drop('PatientID', axis=1, inplace=True)
 
     p = DeploySupervisedModel(modeltype='regression',
-                              df=df,
+                              dataframe=df,
                               graincol='PatientEncounterID',
                               windowcol='InTestWindowFLG',
                               predictedcol='LDLNBR',

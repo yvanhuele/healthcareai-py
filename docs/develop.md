@@ -57,7 +57,7 @@ model creation
 -   **Arguments**:
     :   -   **modeltype**: a string. This will either be
             'classification' or 'regression'.
-        -   **df**: a data frame. The data your model will be based on.
+        -   **dataframe**: a data frame. The data your model will be based on.
         -   **predictedcol**: a string. Name of variable (or column)
             that you want to predict.
         -   **graincol**: a string, defaults to None. Name of possible
