@@ -306,7 +306,6 @@ class DeploySupervisedModel(object):
                 print("""\nAn attempt to complete a transaction has failed.
                       No corresponding transaction found. \nPerhaps you don't
                       have write permission on this server.""")
-            finally:
                 sys.exit()
 
     def _test_database_connection(self, cecnxn, dest_db_schema_table, predictedvalcol):
@@ -338,5 +337,4 @@ class DeploySupervisedModel(object):
                 print("""\nAn attempt to complete a transaction has failed.
                 No corresponding transaction found. \nPerhaps you don't have write
                 permission on this server.""")
-            finally:
                 sys.exit()
