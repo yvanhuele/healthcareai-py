@@ -1,4 +1,4 @@
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import roc_auc_score, roc_curve, auc
 from sklearn.metrics import average_precision_score, precision_recall_curve
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -53,11 +53,12 @@ def clfreport(modeltype,
     if devcheck == 'yesdev':
 
         if tune:
-            clf = GridSearchCV(algo,
-                               param,
+            clf = RandomizedSearchCV(estimator = algo,
+                               param_distributions = param,
+                               n_iter = 10,      
                                cv=5,
                                scoring='roc_auc',
-                               n_jobs=cores)
+                               n_jobs=cores)            
         else:
             clf = algo
 

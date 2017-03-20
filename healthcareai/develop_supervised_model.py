@@ -206,7 +206,8 @@ class DevelopSupervisedModel(object):
         else:  # Here to appease pep8
             algo = None
 
-        params = {'max_features':
+        params = {'n_estimators':[5,10,15,20,25,30,35,40,45,50],
+                  'max_features':
                       model_eval.calculate_rfmtry(len(self.X_test.columns),
                                                       self.modeltype)}
 
@@ -328,4 +329,4 @@ class DevelopSupervisedModel(object):
             print('\nFeature importances saved in: {}'.format(source_path))
             plt.show()
         else:
-            plt.show()
+            plt.show(
