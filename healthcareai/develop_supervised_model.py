@@ -46,7 +46,8 @@ class DevelopSupervisedModel(object):
                  predictedcol,
                  impute,
                  graincol=None,
-                 debug=False):
+                 debug=False,
+                 sampling=None):
 
         self.df = df
         self.predictedcol = predictedcol
@@ -125,6 +126,12 @@ class DevelopSupervisedModel(object):
 
         y = np.squeeze(self.df[[self.predictedcol]])
         X = self.df.drop([self.predictedcol], axis=1)
+        
+        # Under/Over Sampling
+        if sampling=='undersampling':
+            X, y = filters.undersampling(X,y)
+        elif sampling == 'oversampling':
+            X, y = filters.oversampling(X,y)
 
         # Split the dataset in two equal parts
         self.X_train, self.X_test, self.y_train, self.y_test = \
@@ -328,4 +335,4 @@ class DevelopSupervisedModel(object):
             print('\nFeature importances saved in: {}'.format(source_path))
             plt.show()
         else:
-            plt.show()
+            plt.show(
