@@ -46,7 +46,8 @@ class DevelopSupervisedModel(object):
                  predictedcol,
                  impute,
                  graincol=None,
-                 debug=False):
+                 debug=False,
+                 feature_scaling=False):
 
         self.df = df
         self.predictedcol = predictedcol
@@ -117,6 +118,11 @@ class DevelopSupervisedModel(object):
             print(self.df.shape)
             print(self.df.head())
 
+        # Find columns that will not be made to dummies
+        # so that we can later do feature scaling on those only
+        df_temp = df.drop(self.predictedcol,axis = 1) 
+        columns_to_scale = df_temp.select_dtypes(exclude=[object]).columns
+
         # Create dummy vars for all cols but predictedcol
         # First switch (temporarily) pred col to numeric (so it's not dummy)
         self.df[self.predictedcol] = pd.to_numeric(
@@ -138,6 +144,10 @@ class DevelopSupervisedModel(object):
             print(self.X_test.shape)
             print(self.y_test.shape)
 
+        # Feature scaling on relevant columns:
+        if feature_scaling:
+            self.X_train, self.X_test = filters.feature_scaling(self.X_train,self.X_test,columns_to_scale)
+            
     def linear(self, cores=4, debug=False):
         """
         This method creates and assesses the accuracy of a logistic regression
@@ -328,4 +338,4 @@ class DevelopSupervisedModel(object):
             print('\nFeature importances saved in: {}'.format(source_path))
             plt.show()
         else:
-            plt.show()
+            plt.show(
