@@ -1,4 +1,4 @@
-from healthcareai.common.model_eval import GenerateAUC
+from healthcareai.common.generate_roc_auc import generate_AUC
 import pandas as pd
 import numpy as np
 import unittest
@@ -12,7 +12,7 @@ class TestROC(unittest.TestCase):
 
     def runTest(self):
         # ROC_AUC
-        out = GenerateAUC(self.df['a'],self.df['b'],'SS',False,False)
+        out = generate_AUC(self.df['a'], self.df['b'], 'SS', False, False)
         self.assertAlmostEqual(round(out['AU_ROC'],4), 0.9433)
         self.assertAlmostEqual(round(out['BestTpr'],4), 0.9565)
         self.assertAlmostEqual(round(out['BestFpr'],4), 0.2338)
@@ -29,7 +29,7 @@ class TestPR(unittest.TestCase):
 
     def runTest(self):
         # PR_AUC
-        out = GenerateAUC(self.df['a'],self.df['b'],'PR',False,False)
+        out = generate_AUC(self.df['a'], self.df['b'], 'PR', False, False)
         self.assertAlmostEqual(round(out['AU_PR'],4), 0.8622)
         self.assertAlmostEqual(round(out['BestPrecision'], 4), 0.8000)
         self.assertAlmostEqual(round(out['BestRecall'], 4), 0.6957)

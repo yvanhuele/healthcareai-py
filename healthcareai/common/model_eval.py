@@ -1,14 +1,14 @@
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import roc_auc_score, roc_curve, auc
-from sklearn.metrics import average_precision_score, precision_recall_curve
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.externals import joblib
 import math
+
 import numpy as np
 import pandas as pd
-import sys
-import matplotlib.pyplot as plt
+from sklearn.externals import joblib
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import roc_auc_score, auc
+from sklearn.model_selection import GridSearchCV
+
 
 def clfreport(modeltype, debug, devcheck, algo, X_train, y_train, X_test, y_test=None, param=None, cores=4, tune=False, use_saved_model=False, col_list=None):
     """
@@ -250,7 +250,6 @@ def calculate_rfmtry(number_of_columns, type):
         grid_mtry = [start-1,start,start+1]
 
     return grid_mtry
-
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
+import numpy as np
 
-def GenerateAUC(predictions, labels, aucType='SS', plotFlg=False, allCutoffsFlg=False):
+
+def generate_AUC(predictions, labels, aucType='SS', plotFlg=False, allCutoffsFlg=False):
     # TODO refactor this
     """
     This function creates an ROC or PR curve and calculates the area under it.
