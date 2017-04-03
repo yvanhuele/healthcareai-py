@@ -27,6 +27,7 @@ from sklearn.preprocessing import StandardScaler
 
 from nltk import ConfusionMatrix
 import json 
+import pickle
 
 class DevelopSupervisedModel(object):
     """
@@ -303,7 +304,8 @@ class DevelopSupervisedModel(object):
         with open('classification_metrics.json', 'w') as fp:
             json.dump(output, fp, indent=4, sort_keys=True)
 
-
+    def write_model_to_pickle(self):
+        pickle.dump( self.results['best_model'], open( "classification_best_model.pkl", "wb" ) )
     
     def validate_score_metric_for_number_of_classes(self, metric):
         # TODO make this more robust for other scoring metrics
