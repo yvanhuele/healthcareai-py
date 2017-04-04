@@ -43,7 +43,7 @@ For example, if you have a dietary table that looks like this:
 
 #### Parameters
 
-- **server**: server name
+- **server_dns_name**: This must be a dns name that resolves. It cannot be an IP address
 - **database**: database name
 - **source_table**: source table name
 - **destination_table**: destination table name
