@@ -29,6 +29,7 @@ from nltk import ConfusionMatrix
 import json 
 import pickle
 
+
 class DevelopSupervisedModel(object):
     """
     This class helps create a model using several common classifiers
@@ -304,8 +305,13 @@ class DevelopSupervisedModel(object):
         with open('classification_metrics.json', 'w') as fp:
             json.dump(output, fp, indent=4, sort_keys=True)
 
-    def write_model_to_pickle(self):
-        pickle.dump( self.results['best_model'], open( "classification_best_model.pkl", "wb" ) )
+    def write_model_to_pickle(self,file_name = ''):
+        fmt = '%Y-%m-%d_%H-%M-%S'
+        file_name = file_name + "_"  \
+                    + str(datetime.utcnow().strftime(fmt)) \
+                    + ".pkl"
+        with open(file_name, "wb") as output_file:
+            pickle.dump(self.results['best_model'], output_file)
     
     def validate_score_metric_for_number_of_classes(self, metric):
         # TODO make this more robust for other scoring metrics
