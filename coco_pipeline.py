@@ -111,8 +111,6 @@ impact.transform(train_df)
 
 # (3) Dummies -- No need for dummies here
 
-# (4) Under/Over Sampling:
-
 # (4) Under/Over sampling:
 train_df = under_sampling(train_df,'DiedFLG')
 
