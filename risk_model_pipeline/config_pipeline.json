@@ -1,0 +1,13 @@
+{
+	"Mortality":
+		{
+			"TrainTable":"HCUP.NISModelInputBASE",
+			"CustomerTable":"SharedClinicalUnion.ModelInputBASE",
+			"FeatureColumns":["GenderNormFLG","ElectiveFLG","EmergencyDepartmentFLG","LengthOfStayDaysNBR","MSDRGNormCD"],
+			"TargetColumn": ["DiedFLG"],
+			"CustomerGrainColumn": "FacilityAccountID",
+			"DestinationTable":"RiskOutput.SharedClinical"
+		}
+}
+
+	
