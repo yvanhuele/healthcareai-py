@@ -8,7 +8,7 @@ def sql_to_dataframe(sql):
 	''' Use the .env file in the risk_models directory to get the necessary variables
 	to connect to CAFE EDW and CAFE SSISDB
 	'''
-	os.chdir("C:\\Users\\aaronn\\repos\\cafe\\risk_models")
+	os.chdir("C:\\Users\\coco\\healthcareai-py")
 
 	load_dotenv(find_dotenv())  
 

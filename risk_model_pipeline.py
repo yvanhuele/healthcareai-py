@@ -23,7 +23,7 @@ from healthcareai.common.transformers import DataFrameImputer, ImpactCoding, Fea
 import json
 
 ## LOAD CONFIG
-file = r'C:\Users\aaronn\repos\healthcareai-py\risk_model_pipeline\config_pipeline.json'
+file = r'C:\Users\coco\healthcareai-py\risk_model_pipeline\config_pipeline.json'
 with open(file) as json_data:
     d = json.load(json_data)
     print(d)
