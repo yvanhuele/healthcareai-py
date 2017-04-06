@@ -22,18 +22,18 @@ import json
 
 from sklearn.model_selection import train_test_split
 
-from functions import DataFrameImputer
-from functions import ImpactCoding
-from functions import impact_coding
-from functions import impact_coding_learn
-from functions import impact_coding_transform
-from functions import under_sampling
-from functions import over_sampling
-from functions import train_test_splt
-from functions import feature_scaling
-from functions import FeatureScaling
-from functions import randomsearch
-from functions import pick_best_model
+from healthcareai.common.functions import DataFrameImputer
+from healthcareai.common.functions import ImpactCoding
+from healthcareai.common.functions import impact_coding
+from healthcareai.common.functions import impact_coding_learn
+from healthcareai.common.functions import impact_coding_transform
+from healthcareai.common.functions import under_sampling
+from healthcareai.common.functions import over_sampling
+from healthcareai.common.functions import train_test_splt
+from healthcareai.common.functions import feature_scaling
+from healthcareai.common.functions import FeatureScaling
+from healthcareai.common.functions import randomsearch
+from healthcareai.common.functions import pick_best_model
 
 ## LOAD CONFIG
 file = r'C:\Users\coco\healthcareai-py\risk_model_pipeline\config_pipeline.json'
