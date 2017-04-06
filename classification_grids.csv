@@ -1,0 +1,4 @@
+estimator,param_grid,n_iter
+RandomForestClassifier(),"{'n_estimators':list(range(5,31)),'random_state':[1]}",10
+KNeighborsClassifier(),"{'n_neighbors':list(range(5,26)),'weights':['uniform','distance']}",10
+GradientBoostingClassifier(),"{'n_estimators':[100,110,120,130,140,150],'random_state':[1],'max_depth':[3,4,5,6,7]}",10
