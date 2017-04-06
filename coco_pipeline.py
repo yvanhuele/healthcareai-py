@@ -69,13 +69,18 @@ print('Customer data load time: %.2f' % customer['load_time'])
 print('\n')
 train_df = train['data']
 customer_df = customer['data']
+
+print('\n')
 print("Training dataset shape: ", train_df.shape)
 print("Customer dataset shape: ", customer_df.shape)
 	
 mismatch_datatypes = data_type_mismatch(train_df, customer_df)
-print('Data Types')
+
+print('\n')
+print('train_df Data Types:')
 print(train_df.dtypes)
 print('\n')
+print('customer_df Data Types:')
 print(customer_df.dtypes)
 print('\n')
 print("Columns with mismatched data types: ")
@@ -89,54 +94,54 @@ print('\n')
 
 
 ## DATA PROCESSING
-print("IMPACT CODING")
+
+# (1) Imputation -- No need for imputation here
+
+# (2) Impact Coding:
+
+# train, test = train_test_split(train_df,
+#                                test_size=0.8,
+# 			       random_state = 0)
+# train = train.copy()
+# test = test.copy()
+
 impact = ImpactCoding(columns='MSDRGNormCD', target='DiedFLG')
 impact.fit(train_df)
 impact.transform(train_df)
-# impact.transform(customer_df)
-print("Training dataset shape: ", train_df.shape)
-print("Customer dataset shape: ", customer_df.shape)
 
-# scale = FeatureScaling(columns=["MSDRGNormCD","LengthOfStayDaysNBR"])
-# scale.fit(train_df)
-# scale.transform(train_df)
-# scale.transform(customer_df)
+# (3) Dummies -- No need for dummies here
 
+# (4) Under/Over Sampling:
 
+# (4) Under/Over sampling:
+train_df = under_sampling(train_df,'DiedFLG')
 
+# (5) Train/Test Split:
+X_train, X_test, y_train, y_test = \
+    train_test_splt(train_df,predicted_column = 'DiedFLG')
 
-oo = hc.DevelopSupervisedModel(dataframe = train_df, predicted_column = 'DiedFLG', model_type = 'classification')
-# Imputation
+# (6) Feature Scaling:
+scaler = FeatureScaling(columns = ["MSDRGNormCD",
+                                   "LengthOfStayDaysNBR"])
+scaler.fit(X_train)
+scaler.transform(X_train)
+scaler.transform(X_test)
 
-# # # Impact Coding
-# # print(train_df.DiedFLG.value_counts(dropna=False))
-# # print(train_df.dtypes)
-# # train_df['DiedFLG'] = train_df['DiedFLG'].astype(int)
-# # print(train_df.dtypes)
-# # oo.dataframe = impact_coding_on_a_single_column(dataframe = oo.dataframe, predicted_column = 'DiedFLG', impact_column = 'MSDRGNormCD')
+# MODEL SELECTION:
 
+estimator_dictionary = randomsearch(X_train,y_train,'classification')
 
-# impact = ImpactCoding()
-# print(train_df.shape)
-# train_df = impact.fit(train_df,'DiedFLG','MSDRGNormCD')
-# train_df = impact.transform(train_df,'MSDRGNormCD')
-# print(train_df.shape)
-# print(train_df.MSDRGNormCD.head())
-# #customer_df = impact.transform(customer_df,'MSDRGNormCD')
+best_model = pick_best_model(X_test,y_test,estimator_dictionary)
 
-# # Under-sampling
-# print("Under-sampling")
-# print(oo.dataframe.shape)
-# oo.under_sampling()
-# print(oo.dataframe.shape)
+# Retrain best model on all data:
 
-# # # Feature Scaling
-# # oo.train_test_split()
-# # oo.feature_scaling(['LengthOfStayDaysNBR','DRG_impact_coded'])
-# # print("features scaled")
+Xframes = [X_train, X_test]
+yframes = [y_train,y_test]
 
+X = pd.concat(Xframes)
+y = pd.concat(yframes)
+best_model.fit(X,y)
 
-# # ## MODEL SELECTION
 
 # # ## APPLY MODEL TO CUSTOMER DATA
 

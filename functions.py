@@ -238,6 +238,10 @@ def randomsearch(X,y,model_type,
     elif model_type == 'classification':
         input_grids = pd.read_csv('classification_grids.csv')
     estimator_dictionary = {}    
+    print('\n\n')
+    print('**************************************************')
+    print('Cross-Validation performance of models on TRAIN SET:')
+    print('**************************************************')
     for ii in range(0,len(input_grids)):
         grid = RandomizedSearchCV(estimator =
                                   eval(input_grids['estimator'][ii]),
@@ -256,10 +260,17 @@ def randomsearch(X,y,model_type,
     return estimator_dictionary
             
 def pick_best_model(X,y,estimator_dictionary):
+    print('\n\n')
+    print('**************************************************')
+    print('Performance of models on TEST SET:')
+    print('**************************************************')
     best_score = 0
-    for estimator0 in list(estimator_dictionary.values()):
+#    for estimator0 in list(estimator_dictionary.values()):
+    for key0 in list(estimator_dictionary.keys()):
+        estimator0 = estimator_dictionary[key0]
         y_pred = estimator0.predict(X)
         roc_auc = metrics.roc_auc_score(y_true = y, y_score = y_pred)
+        print(key0 + ' score: ' + str(roc_auc))
         if roc_auc > best_score:
             best_score = roc_auc
             best_model = estimator0
