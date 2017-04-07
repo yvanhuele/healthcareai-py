@@ -15,7 +15,6 @@ from sklearn import metrics
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler
 
-from datetime import datetime
 
 class DataFrameImputer(TransformerMixin):
     """Impute missing values.
@@ -260,7 +259,7 @@ def randomsearch(X,y,model_type,
                                                     grid.best_estimator_
     return estimator_dictionary
             
-def choose_best_model(X,y,estimator_dictionary):
+def pick_best_model(X,y,estimator_dictionary):
     print('\n\n')
     print('**************************************************')
     print('Performance of models on TEST SET:')
@@ -280,25 +279,4 @@ def choose_best_model(X,y,estimator_dictionary):
     print("Best score on test set:")
     print(best_score)
     return best_model
-        
-def write_classification_metrics_to_json(y_real,y_pred,file_name = ''):
-    output = {}
-    accuracy = metrics.accuracy_score(y_real,y_pred)
-    confusion_matrix = metrics.confusion_matrix(y_real,y_pred)
-    output['accuracy'] = accuracy
-    output['confusion_matrix'] = confusion_matrix.tolist()
-    fmt = '%Y-%m-%d_%H-%M-%S'
-    file_name = file_name + "_"  \
-                + str(datetime.utcnow().strftime(fmt)) \
-                + ".json"
-    with open(file_name, 'w') as fp:
-        json.dump(output, fp, indent=4, sort_keys=True)
-        
-def write_model_to_pickle(model,file_name = ''):
-    fmt = '%Y-%m-%d_%H-%M-%S'
-    file_name = file_name + "_"  \
-                + str(datetime.utcnow().strftime(fmt)) \
-                + ".pkl"
-    with open(file_name, "wb") as output_file:
-        pickle.dump(self.results['best_model'], output_file)
         

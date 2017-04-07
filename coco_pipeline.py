@@ -34,7 +34,7 @@ from healthcareai.common.functions import train_test_splt
 from healthcareai.common.functions import feature_scaling
 from healthcareai.common.functions import FeatureScaling
 from healthcareai.common.functions import randomsearch
-from healthcareai.common.functions import pick_best_model
+from healthcareai.common.functions import choose_best_model
 
 ## LOAD CONFIG
 file = r'C:\Users\coco\healthcareai-py\risk_model_pipeline\config_pipeline.json'
@@ -146,7 +146,7 @@ scaler.transform(X_cust)
 
 estimator_dictionary = randomsearch(X_train,y_train,'classification')
 
-best_model = pick_best_model(X_test,y_test,estimator_dictionary)
+best_model = choose_best_model(X_test,y_test,estimator_dictionary)
 
 
 # Retrain best model on all data:
