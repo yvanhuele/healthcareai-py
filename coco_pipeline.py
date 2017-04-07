@@ -21,6 +21,7 @@ import pandas as pd
 import json
 
 from sklearn.model_selection import train_test_split
+from sklearn import metrics
 
 from healthcareai.common.functions import DataFrameImputer
 from healthcareai.common.functions import ImpactCoding
@@ -95,7 +96,15 @@ print('\n')
 
 ## DATA PROCESSING
 
-# (1) Imputation -- No need for imputation here
+# (0) Make FacililyAccountID into index:
+
+customer_df.set_index('FacilityAccountID', drop=True, 
+                      append=False, inplace=True, 
+                      verify_integrity=False)
+
+# (1) Imputation -- We do need imputation on customer_df
+imputer = DataFrameImputer()
+imputer.fit_transform(customer_df)
 
 # (2) Impact Coding:
 
@@ -108,6 +117,7 @@ print('\n')
 impact = ImpactCoding(columns='MSDRGNormCD', target='DiedFLG')
 impact.fit(train_df)
 impact.transform(train_df)
+impact.transform(customer_df)
 
 # (3) Dummies -- No need for dummies here
 
@@ -118,12 +128,19 @@ train_df = under_sampling(train_df,'DiedFLG')
 X_train, X_test, y_train, y_test = \
     train_test_splt(train_df,predicted_column = 'DiedFLG')
 
+y_cust = customer_df['DiedFLG']
+X_cust = customer_df.drop('DiedFLG',axis=1)
+
+
 # (6) Feature Scaling:
 scaler = FeatureScaling(columns = ["MSDRGNormCD",
                                    "LengthOfStayDaysNBR"])
 scaler.fit(X_train)
+
 scaler.transform(X_train)
 scaler.transform(X_test)
+scaler.transform(X_cust)
+
 
 # MODEL SELECTION:
 
@@ -131,17 +148,31 @@ estimator_dictionary = randomsearch(X_train,y_train,'classification')
 
 best_model = pick_best_model(X_test,y_test,estimator_dictionary)
 
+
 # Retrain best model on all data:
 
 Xframes = [X_train, X_test]
-yframes = [y_train,y_test]
-
 X = pd.concat(Xframes)
+
+yframes = [y_train,y_test]
 y = pd.concat(yframes)
+
 best_model.fit(X,y)
 
 
 # # ## APPLY MODEL TO CUSTOMER DATA
+
+y_cust_pred =  best_model.predict(X_cust) 
+roc_auc = metrics.roc_auc_score(y_true = y_cust, 
+                                y_score = y_cust_pred)
+
+
+print('\n\n')
+print('**************************************************')
+print('Performance of best model on customer data:')
+print('**************************************************')
+print('roc_auc: ' + str(roc_auc))
+
 
 # # ## WRITE TO CAFE
 # # # # output = customer_df[['DiedFLG','GenderNormDSC']].copy().as_matrix().tolist()
