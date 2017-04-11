@@ -34,6 +34,9 @@ class TestClassImpactCoding(unittest.TestCase):
         self.assertEqual(len(df_final.one.unique()), 2)
         self.assertEqual(len(df_final.two.unique()), 2)
 
+    def test_values_of_column_one(self):
+
+    
         
     def tearDown(self):
         del self.df
