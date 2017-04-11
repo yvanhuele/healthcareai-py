@@ -81,6 +81,7 @@ class ImpactCoding(object):
     def fit_transform(self,df):
         self.fit(df)
         self.transform(df)
+        return df
 
 class FeatureScaling(object):
     def __init__(self,columns):
