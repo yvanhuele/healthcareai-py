@@ -10,12 +10,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler
 
 from datetime import datetime
+import json
+import pickle
 
 class DataFrameImputer(TransformerMixin):
     """Impute missing values.
@@ -301,5 +304,4 @@ def write_model_to_pickle(model,file_name = ''):
                 + str(datetime.utcnow().strftime(fmt)) \
                 + ".pkl"
     with open(file_name, "wb") as output_file:
-        pickle.dump(self.results['best_model'], output_file)
-        
+        pickle.dump(model, output_file)
