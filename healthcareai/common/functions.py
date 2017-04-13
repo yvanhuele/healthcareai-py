@@ -236,12 +236,8 @@ def feature_scaling(X_train, X_test, columns_to_scale):
 
     return X_train, X_test
 
-def randomsearch(X,y,model_type,
+def randomsearch(X,y,input_grids,
                  cv=5,scoring_metric='roc_auc',random_state=0):
-    if model_type == 'regression':
-        input_grids = pd.read_csv('regression_grids.csv')
-    elif model_type == 'classification':
-        input_grids = pd.read_csv('classification_grids.csv')
     estimator_dictionary = {}    
     print('\n\n')
     print('**************************************************')
