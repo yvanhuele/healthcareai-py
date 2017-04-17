@@ -27,8 +27,6 @@ from sklearn.preprocessing import StandardScaler
 
 from nltk import ConfusionMatrix
 import json 
-import pickle
-
 
 class DevelopSupervisedModel(object):
     """
@@ -39,19 +37,11 @@ class DevelopSupervisedModel(object):
 
     Parameters
     ----------
-    modeltype (str) : whether the model will be 'classification' or
-    'regression'
-
+    modeltype (str) : whether the model will be 'classification' or 'regression'
     df (dataframe) : data that your model is based on
-
     predictedcol (str) : y column (in ticks) who's values are being predicted
-
-    impute (boolean) : whether imputation is done on the data; if not,
-    rows with nulls are removed
-
-    graincol (str) : OPTIONAL | column (in ticks) that represents the data's
-    grain
-
+    impute (boolean) : whether imputation is done on the data; if not, rows with nulls are removed
+    graincol (str) : OPTIONAL | column (in ticks) that represents the data's grain
     debug (boolean) : OPTIONAL | verbosity of the output
 
     Returns
@@ -113,7 +103,6 @@ class DevelopSupervisedModel(object):
             self.dataframe[self.predicted_column].replace(['Y', 'N'], [1, 0], inplace=True)
 
             self.print_out_dataframe_shape_and_head('\nDataframe after converting to 1/0 instead of Y/N for classification:')
-
 
     def under_sampling(self,random_state=0):
         # NB: Must be done BEFORE train/test split
@@ -251,7 +240,7 @@ class DevelopSupervisedModel(object):
             model_by_name['KNN'] = self.knn(randomized_search=True, scoring_metric=scoring_metric).best_estimator_
             model_by_name['SGD'] = self.SGDClassifier(randomized_search=True, scoring_metric=scoring_metric).best_estimator_
             model_by_name['Logistic Regression'] = self.logistic_regression()
-            model_by_name['Random Forest Classifier'] = self.advanced_random_forest_classifier(
+            model_by_name['Random Forest Classifier'] = self.random_forest_classifier(
                 randomized_search=True,
                 scoring_metric=scoring_metric).best_estimator_
 
@@ -302,16 +291,10 @@ class DevelopSupervisedModel(object):
         confusion_matrix = metrics.confusion_matrix(self.y_test, y_pred)
         output['accuracy'] = accuracy
         output['confusion_matrix'] = confusion_matrix.tolist()
+        output['auc_roc'] = self.results['best_score']
+        output['algorithm_name']=self.results['best_algorithm_name']
         with open('classification_metrics.json', 'w') as fp:
             json.dump(output, fp, indent=4, sort_keys=True)
-
-    def write_model_to_pickle(self,file_name = ''):
-        fmt = '%Y-%m-%d_%H-%M-%S'
-        file_name = file_name + "_"  \
-                    + str(datetime.utcnow().strftime(fmt)) \
-                    + ".pkl"
-        with open(file_name, "wb") as output_file:
-            pickle.dump(self.results['best_model'], output_file)
     
     def validate_score_metric_for_number_of_classes(self, metric):
         # TODO make this more robust for other scoring metrics
@@ -341,14 +324,54 @@ class DevelopSupervisedModel(object):
 
         return result
 
-    def logistic_regression(self):
-        # TODO STUB FINISH THIS
-        # does it makes sense to wrap this in randomized search too?
-        # enumerate, document and validate scoring options
+    def calculate_regression_metric(self, trained_model):
+        predictions = trained_model.predict(self.X_test)
+        mean_squared_error = metrics.mean_squared_error(self.y_test, predictions)
+        mean_absolute_error = metrics.mean_absolute_error(self.y_test, predictions)
 
-        trained_model = LogisticRegressionCV().fit(self.X_train, self.y_train)
+        result = {'mean_squared_error': mean_squared_error, 'mean_absolute_error': mean_absolute_error}
 
-        return trained_model
+        return result
+
+    def logistic_regression(self, scoring_metric='roc_auc', hyperparameter_grid=None, randomized_search=True):
+        """
+        A light wrapper for Sklearn's logistic regression that performs randomized search over a default (and
+        overideable) hyperparameter grid.
+        """
+        if hyperparameter_grid is None:
+            # TODO sensible default hyperparameter grid
+            pass
+            # hyperparameter_grid = {'n_neighbors': neighbor_list, 'weights': ['uniform', 'distance']}
+
+        algorithm = prepare_randomized_search(
+            LogisticRegressionCV,
+            scoring_metric,
+            hyperparameter_grid,
+            randomized_search,
+            # 5 cross validation folds
+            cv=5)
+
+        return algorithm.fit(self.X_train, self.y_train)
+
+    def linear_regression(self, scoring_metric='roc_auc', hyperparameter_grid=None, randomized_search=True):
+        """
+        A light wrapper for Sklearn's linear regression that performs randomized search over a default (and
+        overideable) hyperparameter grid.
+        """
+        if hyperparameter_grid is None:
+            # TODO sensible default hyperparameter grid
+            pass
+            # hyperparameter_grid = {'n_neighbors': neighbor_list, 'weights': ['uniform', 'distance']}
+
+        algorithm = prepare_randomized_search(
+            LinearRegression,
+            scoring_metric,
+            hyperparameter_grid,
+            randomized_search)
+
+        algorithm.fit(self.X_train, self.y_train)
+
+        return algorithm
 
     def gradient(self, asdfsadffdsa):
         if hyperparameter_grid is None:
@@ -414,9 +437,9 @@ class DevelopSupervisedModel(object):
             randomized_search)
 
         return algorithm.fit(self.X_train, self.y_train)
-    
 
     def linear(self, cores=4, debug=False):
+        # TODO deprecate
         """
         This method creates and assesses the accuracy of a logistic regression
         model.
@@ -444,9 +467,9 @@ class DevelopSupervisedModel(object):
             algo = None
 
         self.y_probab_linear, self.au_roc = model_eval.clfreport(
-                                                modeltype=self.model_type,
+                                                model_type=self.model_type,
                                                 debug=debug,
-                                                devcheck='yesdev',
+                                                develop_model_mode=True,
                                                 algo=algo,
                                                 X_train=self.X_train,
                                                 y_train=self.y_train,
@@ -454,7 +477,7 @@ class DevelopSupervisedModel(object):
                                                 y_test=self.y_test,
                                                 cores=cores)
 
-    def advanced_random_forest_classifier(self, trees=200, scoring_metric='roc_auc', hyperparameter_grid=None, randomized_search=True):
+    def random_forest_classifier(self, trees=200, scoring_metric='roc_auc', hyperparameter_grid=None, randomized_search=True):
         # TODO
         # print out best hyperparameters
         # recreate stuff from the dumpster fire of model_eval.snarf
@@ -479,17 +502,18 @@ class DevelopSupervisedModel(object):
                 hyperparameter_grid = {'n_estimators': [10, 50, 200], 'max_features': max_features}
 
             algorithm = RandomizedSearchCV(estimator=RandomForestClassifier(),
-                                               scoring=scoring_metric,
-                                               param_distributions=hyperparameter_grid,
-                                            # TODO brute force all 6 in the hyperparameter space?
-                                               n_iter=6,
-                                               cv=5,
-                                               verbose=0,
-                                               n_jobs=1)
+                                           scoring=scoring_metric,
+                                           param_distributions=hyperparameter_grid,
+                                           # TODO brute force all 6 in the hyperparameter space?
+                                           n_iter=6,
+                                           cv=5,
+                                           verbose=0,
+                                           n_jobs=1)
 
         return algorithm.fit(self.X_train, self.y_train)
 
     def random_forest(self, cores=4, trees=200, tune=False, debug=False):
+        # TODO deprecate
         """
         This method creates and assesses the accuracy of a logistic regression
         model.
@@ -519,16 +543,15 @@ class DevelopSupervisedModel(object):
         else:  # Here to appease pep8
             algo = None
 
-        params = {'max_features':
-                      helpers.calculate_random_forest_mtry_hyperparameter(len(self.X_test.columns),
-                                                                                              self.model_type)}
+        params = {'max_features': helpers.calculate_random_forest_mtry_hyperparameter(len(self.X_test.columns),
+                                                                                      self.model_type)}
 
         self.col_list = self.X_train.columns.values
 
         self.y_probab_rf, self.au_roc, self.rfclf = model_eval.clfreport(
-                                                    modeltype=self.model_type,
+                                                    model_type=self.model_type,
                                                     debug=debug,
-                                                    devcheck='yesdev',
+                                                    develop_model_mode=True,
                                                     algo=algo,
                                                     X_train=self.X_train,
                                                     y_train=self.y_train,
@@ -745,6 +768,7 @@ class DevelopSupervisedModel(object):
     def save_models(self, random_search):
         pass
 
+
 # TODO think about making this a static method?
 def prepare_randomized_search(
         estimator,
@@ -762,6 +786,7 @@ def prepare_randomized_search(
                                        n_jobs=1)
 
     else:
+        print('No randomized search. Using {}'.format(estimator))
         algorithm = estimator(**non_randomized_estimator_kwargs)
 
     return algorithm
